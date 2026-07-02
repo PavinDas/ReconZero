@@ -7,6 +7,8 @@ import { filesModule } from "../modules/files.module.js";
 import { injectionModule } from "../modules/injection.module.js";
 import { technologyModule } from "../modules/technology.module.js";
 import { whoisModule } from "../modules/whois.module.js";
+import { subdomainsModule } from "../modules/subdomains.module.js";
+import { vulnsModule } from "../modules/vulns.module.js";
 
 const modules = [
   ["dns", dnsModule],
@@ -16,7 +18,9 @@ const modules = [
   ["files", filesModule],
   ["injection", injectionModule],
   ["technology", technologyModule],
-  ["whois", whoisModule]
+  ["whois", whoisModule],
+  ["subdomains", subdomainsModule],
+  ["vulns", vulnsModule]
 ];
 
 const activeScans = new Map();

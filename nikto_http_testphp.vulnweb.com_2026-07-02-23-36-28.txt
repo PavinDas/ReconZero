@@ -1,0 +1,4 @@
+- Nikto v2.6.0/
++ Target Host: testphp.vulnweb.com
++ Target Port: 80
++ GET Unable to connect to testphp.vulnweb.com:80.

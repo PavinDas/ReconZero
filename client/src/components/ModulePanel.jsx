@@ -33,7 +33,9 @@ export default function ModulePanel({ moduleName, result, running }) {
     files: <FilesResult result={result} running={running} />,
     injection: <InjectionResult result={result} />,
     technology: <TechnologyResult result={result} />,
-    whois: <WhoisResult result={result} />
+    whois: <WhoisResult result={result} />,
+    subdomains: <SubdomainsResult result={result} running={running} />,
+    vulns: <VulnsResult result={result} running={running} />
   };
 
   return renderers[moduleName] || <GenericObject data={result} />;
@@ -227,6 +229,149 @@ function FilesResult({ result, running }) {
       </Section>
     </div>
   );
+}
+
+function SubdomainsResult({ result, running }) {
+  const isRunning = running && result.status === "running";
+  const total = result.total || result.scanned || 0;
+
+  return (
+    <div>
+      <PanelTitle title="Subdomain Enumeration" subtitle={result.baseDomain || "Target domain"} />
+      <MetricGrid
+        items={[
+          ["Scanned", total ? `${result.scanned || 0}/${total}` : result.scanned || 0],
+          ["Subdomains Found", result.found?.length || 0],
+          ["Unique IPs", result.ipSet?.length || 0],
+          ["Concurrency", result.concurrency || "-"]
+        ]}
+      />
+      {isRunning ? <p className="live-line">Live enumeration running</p> : null}
+      <Section title="Discovered Subdomains">
+        <SimpleTable
+          columns={["Subdomain", "IP Addresses", "CNAME"]}
+          rows={(result.found || []).map((item) => [
+            <a
+              className="table-link"
+              href={`https://${item.subdomain}`}
+              key={item.subdomain}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {item.subdomain}
+            </a>,
+            item.addresses?.join(", ") || "-",
+            item.cname || "-"
+          ])}
+          empty="No subdomains resolved yet."
+        />
+      </Section>
+      <Section title="Unique IP Addresses">
+        <TagList items={result.ipSet || []} empty="No IP addresses collected yet." />
+      </Section>
+    </div>
+  );
+}
+
+function VulnsResult({ result, running }) {
+  const isRunning = running && result.status === "running";
+  const summary = result.summary || {};
+  const vulns = result.vulnerabilities || [];
+  const grouped = result.grouped || {};
+  const liveLines = result.liveLines || [];
+  const order = ["critical", "high", "medium", "info"];
+  const allGrouped = order.flatMap((sev) => (grouped[sev] || []).map((v) => ({ ...v, severity: sev })));
+
+  return (
+    <div>
+      <PanelTitle
+        title="Vulnerability Scan"
+        subtitle={result.banner ? `Server: ${result.banner}` : result.host || "Nikto analysis"}
+      />
+      <MetricGrid
+        items={[
+          ["Total Findings", summary.total || vulns.length || 0],
+          ["Critical", summary.critical || 0],
+          ["High", summary.high || 0],
+          ["Medium / Info", (summary.medium || 0) + (summary.info || 0)]
+        ]}
+      />
+
+      {isRunning && (
+        <section className="result-section">
+          <h3>Live Nikto Output</h3>
+          <div className="live-log">
+            {liveLines.length === 0 ? (
+              <p>Waiting for nikto to start…</p>
+            ) : (
+              liveLines.map((line, i) => (
+                <p className={/\+ /.test(line) ? "nikto-found" : ""} key={i}>
+                  {line}
+                </p>
+              ))
+            )}
+          </div>
+        </section>
+      )}
+
+      <Section title={`Findings (${vulns.length})`}>
+        {allGrouped.length === 0 ? (
+          <p className="muted-line">
+            {isRunning ? "Scan in progress — findings will appear here." : "No vulnerabilities detected."}
+          </p>
+        ) : (
+          <div className="vuln-list">
+            {allGrouped.map((vuln, i) => (
+              <div className={`vuln-card vuln-card-${vuln.severity}`} key={i}>
+                <div className="vuln-card-header">
+                  <span className={`severity-badge severity-${vuln.severity}`}>{vuln.severity}</span>
+                  {vuln.method && (
+                    <span className={`severity-badge severity-info`}>{vuln.method}</span>
+                  )}
+                </div>
+                <p className="vuln-card-msg">{vuln.msg}</p>
+                {(vuln.url) && (
+                  <div className="vuln-card-meta">
+                    <span>📍 {vuln.url || "/"}</span>
+                    {vuln.id && <span>ID: {vuln.id}</span>}
+                  </div>
+                )}
+                {vuln.references && (
+                  <div className="vuln-card-refs">
+                    {formatRefs(vuln.references)}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+    </div>
+  );
+}
+
+function formatRefs(refs) {
+  if (!refs) return null;
+  const parts = refs.split(/[,\s]+/).filter(Boolean);
+  return parts.map((ref, i) => {
+    const url = refToUrl(ref);
+    return url ? (
+      <span key={i}>
+        {i > 0 ? " · " : ""}
+        <a href={url} rel="noreferrer" target="_blank">{ref}</a>
+      </span>
+    ) : (
+      <span key={i}>{i > 0 ? " · " : ""}{ref}</span>
+    );
+  });
+}
+
+function refToUrl(ref) {
+  if (/^CVE-/i.test(ref)) return `https://nvd.nist.gov/vuln/detail/${ref}`;
+  if (/^OSVDB-/i.test(ref)) return `https://www.cvedetails.com/osvdb/${ref.replace(/^OSVDB-/i, "")}`;
+  if (/^CWE-/i.test(ref)) return `https://cwe.mitre.org/data/definitions/${ref.replace(/^CWE-/i, "")}.html`;
+  if (/^https?:\/\//i.test(ref)) return ref;
+  return null;
 }
 
 function InjectionResult({ result }) {

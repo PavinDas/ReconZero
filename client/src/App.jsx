@@ -8,7 +8,7 @@ import ModulePanel from "./components/ModulePanel.jsx";
 import TargetForm from "./components/TargetForm.jsx";
 import Timeline from "./components/Timeline.jsx";
 
-const modules = ["dns", "headers", "tls", "crawler", "files", "injection", "technology", "whois"];
+const modules = ["dns", "headers", "tls", "crawler", "files", "injection", "technology", "whois", "subdomains", "vulns"];
 
 export default function App() {
   const [scan, setScan] = useState(null);
@@ -171,17 +171,29 @@ function mergeModuleResult(previous = {}, incoming = {}) {
       ...previous,
       ...incoming,
       matches: incoming.matches?.length ? incoming.matches : previous.matches || incoming.matches || [],
-      findings: incoming.findings?.length ? mergeUnique(previous.findings, incoming.findings) : previous.findings || incoming.findings || []
+      findings: incoming.findings?.length ? mergeUnique(previous.findings, incoming.findings) : previous.findings || incoming.findings || [],
+      found: incoming.found?.length ? incoming.found : previous.found || incoming.found || [],
+      ipSet: incoming.ipSet?.length ? mergeUnique(previous.ipSet, incoming.ipSet) : previous.ipSet || incoming.ipSet || [],
+      // vulns: always take incoming liveLines (they are the latest terminal window); merge vulnerabilities
+      liveLines: incoming.liveLines ?? previous.liveLines ?? [],
+      vulnerabilities: incoming.vulnerabilities?.length ? mergeVulns(previous.vulnerabilities, incoming.vulnerabilities) : previous.vulnerabilities || [],
+      grouped: incoming.grouped ?? previous.grouped ?? {}
     };
   }
 
   const matches = mergeMatches(previous.matches, incoming.matches);
+  const found = mergeSubdomains(previous.found, incoming.found);
   return {
     ...previous,
     ...incoming,
     append: undefined,
     matches,
-    findings: mergeUnique(previous.findings, incoming.findings)
+    findings: mergeUnique(previous.findings, incoming.findings),
+    found,
+    ipSet: mergeUnique(previous.ipSet, incoming.ipSet),
+    liveLines: incoming.liveLines ?? previous.liveLines ?? [],
+    vulnerabilities: mergeVulns(previous.vulnerabilities, incoming.vulnerabilities),
+    grouped: incoming.grouped ?? previous.grouped ?? {}
   };
 }
 
@@ -192,8 +204,22 @@ function mergeMatches(previous = [], incoming = []) {
   return Array.from(byPath.values()).sort((a, b) => (a.status || 0) - (b.status || 0) || a.path.localeCompare(b.path));
 }
 
+function mergeSubdomains(previous = [], incoming = []) {
+  const byName = new Map();
+  for (const item of previous) byName.set(item.subdomain, item);
+  for (const item of incoming) byName.set(item.subdomain, item);
+  return Array.from(byName.values()).sort((a, b) => a.subdomain.localeCompare(b.subdomain));
+}
+
 function mergeUnique(previous = [], incoming = []) {
   return Array.from(new Set([...(previous || []), ...(incoming || [])])).slice(0, 80);
+}
+
+function mergeVulns(previous = [], incoming = []) {
+  const byKey = new Map();
+  for (const item of (previous || [])) byKey.set(`${item.url}|${item.msg}`, item);
+  for (const item of (incoming || [])) byKey.set(`${item.url}|${item.msg}`, item);
+  return Array.from(byKey.values());
 }
 
 function getModuleStatus(result) {
