@@ -70,26 +70,25 @@ export default function App() {
       <section className="flex h-full w-full flex-col gap-5 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
         <header className="shrink-0 border-b border-forest/70 pb-4">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-teal">
-              <Terminal size={14} />
-              <span>
-                by{" "}
-                <a className="hover:text-mint transition-colors" href="https://pavindas.github.io" rel="noreferrer" target="_blank">
-                  PavinDas
-                </a>
-              </span>
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-teal">
+                <Terminal size={14} />
+                <span>
+                  by{" "}
+                  <a className="hover:text-mint transition-colors" href="https://pavindas.github.io" rel="noreferrer" target="_blank">
+                    PavinDas
+                  </a>
+                </span>
+              </div>
+              <h1 className="text-4xl font-black leading-none text-mint sm:text-6xl">ReconZero</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-teal">
+                A web reconnaissance tool that gives you real-time results and clear reports.
+              </p>
             </div>
-            <h1 className="text-4xl font-black leading-none text-mint sm:text-6xl">ReconZero</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-teal">
-              Fast local reconnaissance with readable findings, live module progress, and exportable reports.
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-xs text-teal">
-            <StatusPill label="mode" value="authorized" icon={ShieldCheck} />
-            <StatusPill label="status" value={status} icon={Activity} tone={status} />
-            <StatusPill label="modules" value={`${completed}/${modules.length}`} icon={Radar} />
-          </div>
+            <div className="grid grid-cols-2 gap-3 text-xs text-teal">
+              <StatusPill label="status" value={status} icon={Activity} tone={status} />
+              <StatusPill label="modules" value={`${completed}/${modules.length}`} icon={Radar} />
+            </div>
           </div>
         </header>
 
