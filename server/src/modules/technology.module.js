@@ -2,8 +2,8 @@ import * as cheerio from "cheerio";
 import wappalyzer from "simple-wappalyzer";
 import { timedRequest } from "../helpers/http.helper.js";
 
-export async function technologyModule(target) {
-  const { response } = await timedRequest({ method: "GET", url: target.href });
+export async function technologyModule(target, { signal } = {}) {
+  const { response } = await timedRequest({ method: "GET", signal, url: target.href });
   const html = typeof response.data === "string" ? response.data : String(response.data || "");
   const body = html.toLowerCase();
   const $ = cheerio.load(html);

@@ -18,6 +18,7 @@ export async function timedRequest(config) {
   const started = Date.now();
   const response = await httpClient.request({
     ...config,
+    signal: config.signal,
     beforeRedirect: (options) => {
       redirects.push(`${options.protocol}//${options.hostname}${options.path}`);
     }

@@ -1,7 +1,7 @@
 import { timedRequest } from "../helpers/http.helper.js";
 
-export async function headersModule(target) {
-  const { meta, response } = await timedRequest({ method: "GET", url: target.href });
+export async function headersModule(target, { signal } = {}) {
+  const { meta, response } = await timedRequest({ method: "GET", signal, url: target.href });
   const headers = response.headers;
 
   return {

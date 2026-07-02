@@ -1,8 +1,8 @@
 import * as cheerio from "cheerio";
 import { timedRequest } from "../helpers/http.helper.js";
 
-export async function injectionModule(target) {
-  const { response } = await timedRequest({ method: "GET", url: target.href });
+export async function injectionModule(target, { signal } = {}) {
+  const { response } = await timedRequest({ method: "GET", signal, url: target.href });
   const html = typeof response.data === "string" ? response.data : String(response.data || "");
   const $ = cheerio.load(html);
   const endpoints = [];

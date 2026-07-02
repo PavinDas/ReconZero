@@ -1,7 +1,7 @@
 import { Activity, Download, ExternalLink, Radar, ShieldCheck, Terminal } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { startScan } from "./services/api.js";
+import { startScan, stopScan } from "./services/api.js";
 import { useScanSocket } from "./hooks/useScanSocket.js";
 import StatusPill from "./components/StatusPill.jsx";
 import ModulePanel from "./components/ModulePanel.jsx";
@@ -27,6 +27,7 @@ export default function App() {
       setResults((current) => ({ ...current, [event.module]: event.result }));
     }
     if (event.type === "scan:complete") setStatus("complete");
+    if (event.type === "scan:stopped") setStatus("stopped");
     if (event.type === "scan:error") {
       setStatus("failed");
       setError(event.message);
@@ -46,6 +47,17 @@ export default function App() {
     setActiveModule("dns");
     const response = await startScan(target);
     setScan(response);
+  }
+
+  async function handleStop() {
+    if (!scan?.id) return;
+    setStatus("stopping");
+    try {
+      await stopScan(scan.id);
+    } catch (err) {
+      setStatus("running");
+      throw err;
+    }
   }
 
   return (
@@ -73,7 +85,13 @@ export default function App() {
 
         <div className="grid min-h-0 flex-1 gap-5 overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)]">
           <aside className="flex min-h-0 flex-col gap-5 overflow-hidden">
-            <TargetForm disabled={status === "running"} onStart={handleStart} />
+            <TargetForm
+              disabled={status === "running" || status === "stopping"}
+              onStart={handleStart}
+              onStop={handleStop}
+              running={status === "running"}
+              stopping={status === "stopping"}
+            />
             <div className="terminal-panel shrink-0 p-5">
               <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.14em] text-slate-400">
                 <span>progress</span>

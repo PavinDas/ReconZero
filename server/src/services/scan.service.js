@@ -19,32 +19,68 @@ const modules = [
   ["whois", whoisModule]
 ];
 
-export async function runScan({ id, io, target }) {
+const activeScans = new Map();
+
+export function createScanSignal(id) {
+  const controller = new AbortController();
+  activeScans.set(id, { controller, stopped: false });
+  return controller.signal;
+}
+
+export function stopScan(id, io) {
+  const scan = activeScans.get(id);
+  if (!scan) return false;
+
+  scan.controller.abort();
+  if (!scan.stopped) {
+    scan.stopped = true;
+    emit(io, id, { type: "scan:stopped", message: "scan stopped" });
+  }
+  return true;
+}
+
+export async function runScan({ id, io, signal, target }) {
   const startedAt = new Date().toISOString();
   const results = {};
 
   emit(io, id, { type: "scan:start", message: "scan started", target: target.href });
 
-  await Promise.all(
-    modules.map(async ([name, module]) => {
-      emit(io, id, { type: "module:start", module: name, message: "running" });
-      try {
-        const result = await module(target, {
-          emit: (payload) => emit(io, id, { type: "module:update", module: name, ...payload })
-        });
-        results[name] = result;
-        emit(io, id, { type: "module:done", module: name, message: "complete", result });
-      } catch (error) {
-        const result = { error: error.message };
-        results[name] = result;
-        emit(io, id, { type: "module:error", module: name, message: error.message, result });
-      }
-    })
-  );
+  try {
+    await Promise.all(
+      modules.map(async ([name, module]) => {
+        if (signal?.aborted) return;
 
-  const completedAt = new Date().toISOString();
-  const report = writeReport({ id, target: target.href, startedAt, completedAt, results });
-  emit(io, id, { type: "scan:complete", message: "scan complete", report: report.publicPath });
+        emit(io, id, { type: "module:start", module: name, message: "running" });
+        try {
+          const result = await module(target, {
+            emit: (payload) => emit(io, id, { type: "module:update", module: name, ...payload }),
+            signal
+          });
+          if (signal?.aborted) return;
+
+          results[name] = result;
+          emit(io, id, { type: "module:done", module: name, message: "complete", result });
+        } catch (error) {
+          if (signal?.aborted || error.code === "ERR_CANCELED") return;
+
+          const result = { error: error.message };
+          results[name] = result;
+          emit(io, id, { type: "module:error", module: name, message: error.message, result });
+        }
+      })
+    );
+
+    const completedAt = new Date().toISOString();
+    if (signal?.aborted) {
+      if (!activeScans.get(id)?.stopped) emit(io, id, { type: "scan:stopped", message: "scan stopped" });
+      return;
+    }
+
+    const report = writeReport({ id, target: target.href, startedAt, completedAt, results });
+    emit(io, id, { type: "scan:complete", message: "scan complete", report: report.publicPath });
+  } finally {
+    activeScans.delete(id);
+  }
 }
 
 function emit(io, room, payload) {

@@ -1,7 +1,7 @@
-import { Play } from "lucide-react";
+import { Play, Square } from "lucide-react";
 import { useState } from "react";
 
-export default function TargetForm({ disabled, onStart }) {
+export default function TargetForm({ disabled, onStart, onStop, running, stopping }) {
   const [target, setTarget] = useState("");
   const [error, setError] = useState("");
 
@@ -9,6 +9,11 @@ export default function TargetForm({ disabled, onStart }) {
     event.preventDefault();
     setError("");
     try {
+      if (running) {
+        await onStop();
+        return;
+      }
+
       await onStart(target);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -32,9 +37,9 @@ export default function TargetForm({ disabled, onStart }) {
         value={target}
       />
       {error && <p className="mt-3 text-xs text-bad">{error}</p>}
-      <button className="primary-button mt-4" disabled={disabled} type="submit">
-        <Play size={16} />
-        {disabled ? "running" : "start scan"}
+      <button className={`primary-button mt-4 ${running ? "primary-button-danger" : ""}`} disabled={disabled && !running} type="submit">
+        {running ? <Square size={16} /> : <Play size={16} />}
+        {running ? "stop scan" : stopping ? "stopping" : "start scan"}
       </button>
     </form>
   );

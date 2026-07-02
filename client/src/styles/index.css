@@ -139,6 +139,16 @@ body::before {
   transform: translateY(-1px);
 }
 
+.primary-button-danger {
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.18), rgba(244, 63, 94, 0.16));
+  border-color: rgba(251, 113, 133, 0.65);
+}
+
+.primary-button-danger:hover {
+  background: rgba(251, 113, 133, 0.16);
+  border-color: rgba(251, 113, 133, 0.95);
+}
+
 .primary-button:disabled {
   color: #94a3b8;
   cursor: wait;

@@ -1,6 +1,6 @@
 import tls from "node:tls";
 
-export function tlsModule(target) {
+export function tlsModule(target, { signal } = {}) {
   if (target.protocol !== "https:") return { enabled: false, reason: "target is not https" };
 
   return new Promise((resolve, reject) => {
@@ -35,6 +35,14 @@ export function tlsModule(target) {
       reject(new Error("TLS connection timed out"));
     });
     socket.on("error", reject);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        socket.destroy();
+        reject(new Error("Scan stopped"));
+      },
+      { once: true }
+    );
   });
 }
 

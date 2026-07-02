@@ -38,7 +38,7 @@ const fallbackPaths = [
   "favicon.ico"
 ];
 
-export async function filesModule(target, { emit } = {}) {
+export async function filesModule(target, { emit, signal } = {}) {
   const wordlistPath = process.env.FILE_WORDLIST_PATH || defaultWordlist;
   const limit = readPositiveInt(process.env.FILE_WORDLIST_LIMIT, 5000);
   const directoryLimit = readPositiveInt(process.env.FILE_DIRECTORY_SCAN_LIMIT, 100);
@@ -57,9 +57,9 @@ export async function filesModule(target, { emit } = {}) {
     result: createSnapshot({ concurrency, directoryLimit, limit, matches, scanned, status: "running", total, wordlistPath })
   });
 
-  await mapPool(candidates, concurrency, async (candidate) => {
+  await mapPool(candidates, concurrency, signal, async (candidate) => {
     scanned += 1;
-    const match = await probePath(candidate, target, timeout, seenPaths);
+    const match = await probePath(candidate, target, timeout, seenPaths, signal);
     if (!match) {
       emitScannedProgress(emit, { concurrency, directoryLimit, limit, matches, scanned, total, wordlistPath });
       return;
@@ -79,9 +79,9 @@ export async function filesModule(target, { emit } = {}) {
     });
   }
 
-  await mapPool(directoryCandidates, concurrency, async (candidate) => {
+  await mapPool(directoryCandidates, concurrency, signal, async (candidate) => {
     scanned += 1;
-    const match = await probePath(candidate, target, timeout, seenPaths);
+    const match = await probePath(candidate, target, timeout, seenPaths, signal);
     if (!match) {
       emitScannedProgress(emit, { concurrency, directoryLimit, limit, matches, scanned, total, wordlistPath });
       return;
@@ -218,10 +218,10 @@ function fileVariantsFor(candidate) {
   return [clean, ...commonExtensions.map((extension) => `${clean}${extension}`)];
 }
 
-async function mapPool(items, concurrency, worker) {
+async function mapPool(items, concurrency, signal, worker) {
   let cursor = 0;
   const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (cursor < items.length) {
+    while (cursor < items.length && !signal?.aborted) {
       const item = items[cursor];
       cursor += 1;
       await worker(item);
@@ -231,14 +231,15 @@ async function mapPool(items, concurrency, worker) {
   await Promise.all(workers);
 }
 
-async function probePath(candidate, target, timeout, seenPaths) {
+async function probePath(candidate, target, timeout, seenPaths, signal) {
+  if (signal?.aborted) return null;
   const filePath = normalizePath(candidate);
   if (!filePath || seenPaths.has(filePath)) return null;
   seenPaths.add(filePath);
 
   const url = new URL(filePath, target.origin).href;
   try {
-    const { response, meta } = await timedRequest({ method: "GET", timeout, url });
+    const { response, meta } = await timedRequest({ method: "GET", signal, timeout, url });
     if (isFourHundred(response.status)) return null;
 
     const body = typeof response.data === "string" ? response.data : "";
