@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import wappalyzer from "simple-wappalyzer";
 import { timedRequest } from "../helpers/http.helper.js";
 
 export async function technologyModule(target) {
@@ -34,7 +35,16 @@ export async function technologyModule(target) {
   if (scripts.some((src) => src.includes("jquery"))) hints.push("jquery");
   if (cookies.some((cookie) => cookie.startsWith("_ga"))) hints.push("google analytics cookie");
 
-  return { hints: [...new Set([...hints, ...generators])], cookies, meta, generators, scripts: scripts.slice(0, 40) };
+  const wappalyzerResult = await detectWithWappalyzer({ headers, html, url: target.href });
+
+  return {
+    hints: [...new Set([...hints, ...generators])],
+    cookies,
+    meta,
+    generators,
+    scripts: scripts.slice(0, 40),
+    wappalyzer: wappalyzerResult
+  };
 }
 
 function addHeaderHint(hints, name, value) {
@@ -44,4 +54,30 @@ function addHeaderHint(hints, name, value) {
 function normalizeCookies(value) {
   const cookies = Array.isArray(value) ? value : value ? [value] : [];
   return cookies.map((cookie) => cookie.split(";")[0]).filter(Boolean).slice(0, 40);
+}
+
+async function detectWithWappalyzer({ headers, html, url }) {
+  try {
+    const applications = await wappalyzer({ headers, html, url });
+    return {
+      applications: applications.map(normalizeApplication).sort((a, b) => b.confidence - a.confidence || a.name.localeCompare(b.name)),
+      error: ""
+    };
+  } catch (error) {
+    return {
+      applications: [],
+      error: error.message
+    };
+  }
+}
+
+function normalizeApplication(application) {
+  return {
+    name: application.name,
+    confidence: application.confidence || 0,
+    version: application.version || "",
+    website: application.website || "",
+    cpe: application.cpe || "",
+    categories: (application.categories || []).map((category) => category.name).filter(Boolean)
+  };
 }

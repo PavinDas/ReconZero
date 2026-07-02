@@ -261,17 +261,39 @@ function InjectionResult({ result }) {
 }
 
 function TechnologyResult({ result }) {
+  const wappalyzerApps = result.wappalyzer?.applications || [];
+
   return (
     <div>
       <PanelTitle title="Technology Fingerprint" subtitle="Detected from headers, markup, scripts and cookies" />
       <MetricGrid
         items={[
+          ["Wappalyzer", wappalyzerApps.length],
           ["Hints", result.hints?.length || 0],
           ["Cookies", result.cookies?.length || 0],
-          ["Meta Tags", result.meta?.length || 0],
-          ["Generators", result.generators?.length || 0]
+          ["Meta Tags", result.meta?.length || 0]
         ]}
       />
+      <Section title="Wappalyzer Results">
+        {result.wappalyzer?.error ? <Callout tone="warn" title="Wappalyzer unavailable" value={result.wappalyzer.error} /> : null}
+        <SimpleTable
+          columns={["Technology", "Confidence", "Version", "Categories", "CPE"]}
+          rows={wappalyzerApps.map((item) => [
+            item.website ? (
+              <a className="table-link" href={item.website} key={item.name} rel="noreferrer" target="_blank">
+                {item.name}
+              </a>
+            ) : (
+              item.name
+            ),
+            `${item.confidence || 0}%`,
+            item.version || "-",
+            item.categories?.join(", ") || "-",
+            item.cpe || "-"
+          ])}
+          empty="No Wappalyzer technologies detected."
+        />
+      </Section>
       <Section title="Detected Hints">
         <TagList items={result.hints || []} empty="No clear technology hints detected." />
       </Section>
