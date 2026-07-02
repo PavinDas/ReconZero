@@ -8,7 +8,7 @@ import ModulePanel from "./components/ModulePanel.jsx";
 import TargetForm from "./components/TargetForm.jsx";
 import Timeline from "./components/Timeline.jsx";
 
-const modules = ["dns", "headers", "tls", "crawler", "files", "technology", "whois"];
+const modules = ["dns", "headers", "tls", "crawler", "files", "injection", "technology", "whois"];
 
 export default function App() {
   const [scan, setScan] = useState(null);

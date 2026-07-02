@@ -31,6 +31,7 @@ export default function ModulePanel({ moduleName, result, running }) {
     tls: <TlsResult result={result} />,
     crawler: <CrawlerResult result={result} />,
     files: <FilesResult result={result} running={running} />,
+    injection: <InjectionResult result={result} />,
     technology: <TechnologyResult result={result} />,
     whois: <WhoisResult result={result} />
   };
@@ -223,6 +224,37 @@ function FilesResult({ result, running }) {
       </Section>
       <Section title="Interesting Findings">
         <TagList items={result.findings || []} empty="No notable directives found." />
+      </Section>
+    </div>
+  );
+}
+
+function InjectionResult({ result }) {
+  return (
+    <div>
+      <PanelTitle title="Injection Input Points" subtitle="URLs and forms with user-controlled parameters" />
+      <MetricGrid
+        items={[
+          ["Endpoints", result.endpoints?.length || 0],
+          ["Parameters", result.parameterCount || 0],
+          ["Links Checked", result.scanned?.links || 0],
+          ["Forms Checked", result.scanned?.forms || 0]
+        ]}
+      />
+      <Section title="Candidate Endpoints">
+        <SimpleTable
+          columns={["Endpoint", "Method", "Type", "Parameters", "Source"]}
+          rows={(result.endpoints || []).map((item) => [
+            <a className="table-link" href={item.url} key={item.url} rel="noreferrer" target="_blank">
+              {item.path}
+            </a>,
+            item.method,
+            item.type,
+            item.parameters?.join(", ") || "-",
+            item.source
+          ])}
+          empty="No URLs with parameters or forms with named inputs found."
+        />
       </Section>
     </div>
   );

@@ -4,6 +4,7 @@ import { headersModule } from "../modules/headers.module.js";
 import { tlsModule } from "../modules/tls.module.js";
 import { crawlerModule } from "../modules/crawler.module.js";
 import { filesModule } from "../modules/files.module.js";
+import { injectionModule } from "../modules/injection.module.js";
 import { technologyModule } from "../modules/technology.module.js";
 import { whoisModule } from "../modules/whois.module.js";
 
@@ -13,6 +14,7 @@ const modules = [
   ["tls", tlsModule],
   ["crawler", crawlerModule],
   ["files", filesModule],
+  ["injection", injectionModule],
   ["technology", technologyModule],
   ["whois", whoisModule]
 ];
