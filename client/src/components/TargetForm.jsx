@@ -22,7 +22,7 @@ export default function TargetForm({ disabled, onStart, onStop, running, stoppin
 
   return (
     <form className="terminal-panel p-4" onSubmit={submit}>
-      <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-slate-400" htmlFor="target">
+      <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-teal" htmlFor="target">
         target url
       </label>
       <input
@@ -36,7 +36,7 @@ export default function TargetForm({ disabled, onStart, onStop, running, stoppin
         type="url"
         value={target}
       />
-      {error && <p className="mt-3 text-xs text-bad">{error}</p>}
+      {error && <p className="mt-3 text-xs text-mint">{error}</p>}
       <button className={`primary-button mt-4 ${running ? "primary-button-danger" : ""}`} disabled={disabled && !running} type="submit">
         {running ? <Square size={16} /> : <Play size={16} />}
         {running ? "stop scan" : stopping ? "stopping" : "start scan"}

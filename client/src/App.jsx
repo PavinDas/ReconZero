@@ -61,26 +61,26 @@ export default function App() {
   }
 
   return (
-    <main className="h-dvh w-dvw overflow-hidden bg-ink text-slate-100 font-mono selection:bg-acid selection:text-ink">
+    <main className="h-dvh w-dvw overflow-hidden bg-void text-mint font-sans selection:bg-mint selection:text-void">
       <section className="flex h-full w-full flex-col gap-5 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
-        <header className="shrink-0 border-b border-line/70 pb-4">
+        <header className="shrink-0 border-b border-forest/70 pb-4">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-cyan-300">
+            <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-teal">
               <Terminal size={14} />
               <span>
                 by{" "}
-                <a className="hover:text-cyan-100" href="https://pavindas.github.io" rel="noreferrer" target="_blank">
+                <a className="hover:text-mint transition-colors" href="https://pavindas.github.io" rel="noreferrer" target="_blank">
                   PavinDas
                 </a>
               </span>
             </div>
-            <h1 className="text-4xl font-black leading-none text-slate-50 sm:text-6xl">ReconZero</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            <h1 className="text-4xl font-black leading-none text-mint sm:text-6xl">ReconZero</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-teal">
               Fast local reconnaissance with readable findings, live module progress, and exportable reports.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-xs text-slate-400">
+          <div className="grid grid-cols-3 gap-3 text-xs text-teal">
             <StatusPill label="mode" value="authorized" icon={ShieldCheck} />
             <StatusPill label="status" value={status} icon={Activity} tone={status} />
             <StatusPill label="modules" value={`${completed}/${modules.length}`} icon={Radar} />
@@ -98,13 +98,13 @@ export default function App() {
               stopping={status === "stopping"}
             />
             <div className="terminal-panel shrink-0 p-5">
-              <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.14em] text-slate-400">
+              <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.14em] text-teal">
                 <span>progress</span>
-                <span className="text-cyan-300">{progress}%</span>
+                <span className="text-teal">{progress}%</span>
               </div>
-              <div className="h-3 overflow-hidden rounded-full bg-slate-950">
+              <div className="h-3 overflow-hidden rounded-full bg-void">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-lime-300"
+                  className="h-full rounded-full bg-gradient-to-r from-forest via-teal to-mint"
                   animate={{ width: `${progress}%` }}
                   transition={{ type: "spring", stiffness: 90, damping: 18 }}
                 />
@@ -130,9 +130,9 @@ export default function App() {
           </aside>
 
           <section className="terminal-panel flex min-h-0 flex-col overflow-hidden">
-            <div className="flex shrink-0 items-center justify-between border-b border-line/70 px-6 py-4">
-              <div className="truncate text-sm text-slate-400">
-                target: <span className="text-cyan-200">{scan?.target || "awaiting input"}</span>
+            <div className="flex shrink-0 items-center justify-between border-b border-forest/70 px-6 py-4">
+              <div className="truncate text-sm text-teal">
+                target: <span className="text-mint">{scan?.target || "awaiting input"}</span>
               </div>
               {scan?.id && (
                 <a className="icon-button" href={`/api/reports/${scan.id}/json`} title="Download JSON">
@@ -148,12 +148,12 @@ export default function App() {
                 initial={{ opacity: 0, y: 8 }}
                 key={activeModule}
               >
-                {error && <div className="mb-4 border border-bad p-3 text-sm text-bad">{error}</div>}
+                {error && <div className="mb-4 border border-teal p-3 text-sm text-mint">{error}</div>}
                 <ModulePanel moduleName={activeModule} result={results[activeModule]} running={status === "running"} />
               </motion.div>
             </AnimatePresence>
             {scan?.target && (
-              <div className="shrink-0 border-t border-line/70 px-6 py-4 text-xs text-slate-500">
+              <div className="shrink-0 border-t border-forest/70 px-6 py-4 text-xs text-teal">
                 <ExternalLink className="mr-2 inline" size={13} />
                 only scan assets you own or have explicit permission to assess
               </div>
@@ -197,8 +197,8 @@ function mergeUnique(previous = [], incoming = []) {
 }
 
 function getModuleStatus(result) {
-  if (result?.error) return { className: "text-rose-300", label: "ERR" };
-  if (result?.status === "running") return { className: "text-cyan-300", label: "LIVE" };
-  if (result) return { className: "text-emerald-300", label: "OK" };
-  return { className: "text-slate-500", label: "WAIT" };
+  if (result?.error) return { className: "text-mint", label: "ERR" };
+  if (result?.status === "running") return { className: "text-teal", label: "LIVE" };
+  if (result) return { className: "text-mint", label: "OK" };
+  return { className: "text-teal", label: "WAIT" };
 }

@@ -6,8 +6,8 @@ export default function ModulePanel({ moduleName, result, running }) {
       <div className="empty-state">
         {running ? <Loader2 className="animate-spin" size={22} /> : null}
         <div>
-          <div className="text-base text-slate-100">{running ? `Scanning ${label(moduleName)}` : "Ready for scan"}</div>
-          <div className="mt-1 text-sm text-slate-400">
+          <div className="text-base text-mint">{running ? `Scanning ${label(moduleName)}` : "Ready for scan"}</div>
+          <div className="mt-1 text-sm text-teal">
             {running ? "Results will appear here as soon as this module finishes." : "Enter a target URL to begin."}
           </div>
         </div>
@@ -346,8 +346,8 @@ function PanelTitle({ subtitle, title }) {
   return (
     <div className="mb-6">
       <div className="eyebrow">module result</div>
-      <h2 className="mt-2 text-2xl font-bold text-slate-50">{title}</h2>
-      {subtitle ? <p className="mt-1 break-words text-sm text-slate-400">{subtitle}</p> : null}
+      <h2 className="mt-2 text-2xl font-bold text-mint">{title}</h2>
+      {subtitle ? <p className="mt-1 break-words text-sm text-teal">{subtitle}</p> : null}
     </div>
   );
 }
@@ -357,8 +357,8 @@ function MetricGrid({ items }) {
     <div className="result-grid">
       {items.map(([name, value]) => (
         <div className="metric-card" key={name}>
-          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">{name}</div>
-          <div className="mt-2 truncate text-xl font-semibold text-slate-50">{value}</div>
+          <div className="text-xs uppercase tracking-[0.14em] text-teal">{name}</div>
+          <div className="mt-2 truncate text-xl font-semibold text-mint">{value}</div>
         </div>
       ))}
     </div>
@@ -429,7 +429,7 @@ function StatusTable({ rows }) {
         <div className="status-row" key={name}>
           {tone === "ok" ? <CheckCircle2 size={17} /> : <XCircle size={17} />}
           <span>{name}</span>
-          <strong className={tone === "ok" ? "text-emerald-300" : "text-amber-300"}>{value}</strong>
+          <strong className={tone === "ok" ? "text-mint" : "text-teal"}>{value}</strong>
         </div>
       ))}
     </div>
