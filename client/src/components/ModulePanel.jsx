@@ -30,7 +30,7 @@ export default function ModulePanel({ moduleName, result, running }) {
     headers: <HeadersResult result={result} />,
     tls: <TlsResult result={result} />,
     crawler: <CrawlerResult result={result} />,
-    files: <FilesResult result={result} />,
+    files: <FilesResult result={result} running={running} />,
     technology: <TechnologyResult result={result} />,
     whois: <WhoisResult result={result} />
   };
@@ -190,23 +190,35 @@ function CrawlerResult({ result }) {
   );
 }
 
-function FilesResult({ result }) {
+function FilesResult({ result, running }) {
+  const total = result.total || result.scanned || 0;
+  const isRunning = running && result.status === "running";
+
   return (
     <div>
-      <PanelTitle title="Well-known Files" subtitle="robots, sitemap, security policy and common metadata" />
+      <PanelTitle title="File and Path Discovery" subtitle={result.wordlistPath || "Configured wordlist"} />
       <MetricGrid
         items={[
-          ["Checked", result.checks?.length || 0],
-          ["Available", result.checks?.filter((item) => item.status >= 200 && item.status < 300).length || 0],
-          ["Blocked/Missing", result.checks?.filter((item) => item.status >= 400 || item.error).length || 0],
-          ["Total Bytes", result.checks?.reduce((sum, item) => sum + (item.size || 0), 0) || 0]
+          ["Scanned", total ? `${result.scanned || 0}/${total}` : result.scanned || 0],
+          ["Found", result.matches?.length || 0],
+          ["Concurrency", result.concurrency || "-"],
+          ["Total Bytes", result.matches?.reduce((sum, item) => sum + (item.size || 0), 0) || 0]
         ]}
       />
-      <Section title="File Checks">
+      {isRunning ? <p className="live-line">Live discovery running</p> : null}
+      <Section title="Discovered Paths">
         <SimpleTable
-          columns={["Path", "Status", "Size"]}
-          rows={(result.checks || []).map((item) => [item.path, item.error || item.status, item.size || 0])}
-          empty="No file checks completed."
+          columns={["Path", "Status", "Size", "Time", "Type"]}
+          rows={(result.matches || []).map((item) => [
+            <a className="table-link" href={item.url || item.finalUrl} key={item.path} rel="noreferrer" target="_blank">
+              {item.path}
+            </a>,
+            item.status,
+            item.size || 0,
+            `${item.responseTimeMs || 0} ms`,
+            item.kind === "directory" ? "directory" : item.contentType || "-"
+          ])}
+          empty="No non-4xx paths discovered."
         />
       </Section>
       <Section title="Interesting Findings">
@@ -339,7 +351,7 @@ function SimpleTable({ columns, empty, rows }) {
             <tr key={index}>
               {row.map((cell, cellIndex) => (
                 <td key={`${index}-${cellIndex}`}>
-                  <div className="table-cell-scroll">{cell === 0 ? "0" : String(cell || "-")}</div>
+                  <div className="table-cell-scroll">{renderCell(cell)}</div>
                 </td>
               ))}
             </tr>
@@ -348,6 +360,12 @@ function SimpleTable({ columns, empty, rows }) {
       </table>
     </div>
   );
+}
+
+function renderCell(cell) {
+  if (cell === 0) return "0";
+  if (cell === undefined || cell === null || cell === "") return "-";
+  return cell;
 }
 
 function StatusTable({ rows }) {

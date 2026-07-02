@@ -27,7 +27,9 @@ export async function runScan({ id, io, target }) {
     modules.map(async ([name, module]) => {
       emit(io, id, { type: "module:start", module: name, message: "running" });
       try {
-        const result = await module(target);
+        const result = await module(target, {
+          emit: (payload) => emit(io, id, { type: "module:update", module: name, ...payload })
+        });
         results[name] = result;
         emit(io, id, { type: "module:done", module: name, message: "complete", result });
       } catch (error) {

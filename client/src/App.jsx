@@ -20,6 +20,9 @@ export default function App() {
 
   const handleScanEvent = useCallback((event) => {
     setEvents((current) => [event, ...current].slice(0, 80));
+    if (event.type === "module:update") {
+      setResults((current) => ({ ...current, [event.module]: mergeModuleResult(current[event.module], event.result) }));
+    }
     if (event.type === "module:done" || event.type === "module:error") {
       setResults((current) => ({ ...current, [event.module]: event.result }));
     }
@@ -32,7 +35,7 @@ export default function App() {
 
   useScanSocket(scan?.id, { onEvent: handleScanEvent });
 
-  const completed = Object.keys(results).length;
+  const completed = modules.filter((name) => results[name] && results[name].status !== "running").length;
   const progress = useMemo(() => Math.round((completed / modules.length) * 100), [completed]);
 
   async function handleStart(target) {
@@ -84,19 +87,20 @@ export default function App() {
                 />
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
-                {modules.map((name) => (
-                  <button
-                    className={`module-tab ${activeModule === name ? "module-tab-active" : ""}`}
-                    key={name}
-                    onClick={() => setActiveModule(name)}
-                    type="button"
-                  >
-                    <span className={results[name]?.error ? "text-rose-300" : results[name] ? "text-emerald-300" : "text-slate-500"}>
-                      {results[name]?.error ? "ERR" : results[name] ? "OK" : "WAIT"}
-                    </span>
-                    {name}
-                  </button>
-                ))}
+                {modules.map((name) => {
+                  const moduleStatus = getModuleStatus(results[name]);
+                  return (
+                    <button
+                      className={`module-tab ${activeModule === name ? "module-tab-active" : ""}`}
+                      key={name}
+                      onClick={() => setActiveModule(name)}
+                      type="button"
+                    >
+                      <span className={moduleStatus.className}>{moduleStatus.label}</span>
+                      {name}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <Timeline events={events} />
@@ -136,4 +140,42 @@ export default function App() {
       </section>
     </main>
   );
+}
+
+function mergeModuleResult(previous = {}, incoming = {}) {
+  if (!incoming.append) {
+    return {
+      ...previous,
+      ...incoming,
+      matches: incoming.matches?.length ? incoming.matches : previous.matches || incoming.matches || [],
+      findings: incoming.findings?.length ? mergeUnique(previous.findings, incoming.findings) : previous.findings || incoming.findings || []
+    };
+  }
+
+  const matches = mergeMatches(previous.matches, incoming.matches);
+  return {
+    ...previous,
+    ...incoming,
+    append: undefined,
+    matches,
+    findings: mergeUnique(previous.findings, incoming.findings)
+  };
+}
+
+function mergeMatches(previous = [], incoming = []) {
+  const byPath = new Map();
+  for (const item of previous) byPath.set(item.path, item);
+  for (const item of incoming) byPath.set(item.path, item);
+  return Array.from(byPath.values()).sort((a, b) => (a.status || 0) - (b.status || 0) || a.path.localeCompare(b.path));
+}
+
+function mergeUnique(previous = [], incoming = []) {
+  return Array.from(new Set([...(previous || []), ...(incoming || [])])).slice(0, 80);
+}
+
+function getModuleStatus(result) {
+  if (result?.error) return { className: "text-rose-300", label: "ERR" };
+  if (result?.status === "running") return { className: "text-cyan-300", label: "LIVE" };
+  if (result) return { className: "text-emerald-300", label: "OK" };
+  return { className: "text-slate-500", label: "WAIT" };
 }

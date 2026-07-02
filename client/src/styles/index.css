@@ -203,6 +203,12 @@ body::before {
   min-width: 0;
 }
 
+.live-line {
+  color: #67e8f9;
+  font-size: 0.82rem;
+  margin: 1rem 0 0;
+}
+
 .result-section {
   border-top: 1px solid rgba(51, 65, 85, 0.75);
   margin-top: 1.5rem;
@@ -280,6 +286,18 @@ body::before {
   padding-right: 0.35rem;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.table-link {
+  color: #93c5fd;
+  text-decoration: underline;
+  text-decoration-color: rgba(147, 197, 253, 0.45);
+  text-underline-offset: 0.18em;
+}
+
+.table-link:hover {
+  color: #bfdbfe;
+  text-decoration-color: currentColor;
 }
 
 .muted-line {
