@@ -1,91 +1,94 @@
 # ReconZero
 
-ReconZero is a local reconnaissance dashboard for authorized web targets. It brings common discovery signals into one clean workspace: DNS records, HTTP headers, TLS metadata, page structure, exposed file paths, technology hints, and a downloadable JSON report.
+> A web reconnaissance tool that gives you real-time results and clear reports.
 
-It is built for fast first-pass inspection: start a scan, watch module progress in real time, stop it when needed, and keep the results easy to read.
+ReconZero is a local, automated reconnaissance dashboard built for web security assessments. It consolidates multiple intelligence-gathering phases into a single, seamless React-based workspace. From DNS profiling to active vulnerability scanning, it delivers findings in real time with high readability and exportability.
 
-## Highlights
+---
 
-- Live scan progress over Socket.IO
-- DNS, headers, TLS, crawler, files, injection surface, technology, and WHOIS modules
-- File and directory discovery with configurable wordlist limits
-- JSON report export for completed scans
-- React dashboard with a Node/Express API
+## ✨ Features
 
-## Tech Stack
+- **Real-Time Execution Engine:** Modules stream data live via WebSocket as they run.
+- **Vulnerability Scanning (Nikto):** Integrated vulnerability assessment with live terminal streaming, automatic severity classification (Critical, High, Medium, Info), and clickable CVE/CWE references.
+- **Subdomain Enumeration:** Concurrent, wordlist-driven DNS resolution for target discovery.
+- **Directory & File Discovery:** Fast, asynchronous path scanning with configurable limits.
+- **Comprehensive Analysis:** Modules for DNS, HTTP Headers, TLS Certificates, Web Crawling, WHOIS, Technology Fingerprinting, and Injection Point discovery.
+- **Exportable Reporting:** Download full JSON reports for the entire scan, or grab individual module results (per-tab downloads) on the fly.
+- **Polished UI:** A dark-themed, intuitive dashboard built with Tailwind CSS and Framer Motion for a premium developer experience.
 
-- Client: React, Vite, Tailwind CSS, Framer Motion
-- Server: Node.js, Express, Socket.IO
-- Workspace: npm workspaces
+## 🛠 Tech Stack
 
-## Setup
+- **Client:** React, Vite, Tailwind CSS, Framer Motion
+- **Server:** Node.js, Express, Socket.IO
+- **Tools:** `nikto` (external dependency for vulnerability module)
 
-### 1. Install dependencies
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+You will need **Node.js** (v18+) and **npm**.
+The vulnerability scanning module requires the **Nikto** security scanner to be installed on your host system.
+
+**Debian/Ubuntu:**
+```bash
+sudo apt update && sudo apt install nikto
+```
+
+### 2. Install Dependencies
+
+Clone the repository and install the Node workspaces:
 
 ```bash
 npm install
 ```
 
-### 2. Configure the server
+### 3. Environment Configuration
 
-Create a local environment file from the example:
+Copy the example environment file to configure your local setup:
 
 ```bash
 cp server/.env.example server/.env
 ```
 
-The defaults are ready for local development:
-
+**Default `.env` configuration:**
 ```env
 PORT=4000
 CLIENT_ORIGIN=http://localhost:5173
 FILE_WORDLIST_LIMIT=5000
 FILE_SCAN_CONCURRENCY=12
 FILE_SCAN_TIMEOUT_MS=5000
+# SUBDOMAIN_CONCURRENCY=30
+# NIKTO_MAXTIME=120s
 ```
 
-### 3. Start development mode
+### 4. Run the Application
+
+Start both the backend API and the frontend dashboard concurrently in development mode:
 
 ```bash
 npm run dev
 ```
 
-Open the dashboard at:
+- **Dashboard UI:** [http://localhost:5173](http://localhost:5173)
+- **API Server:** [http://localhost:4000](http://localhost:4000)
 
-```text
-http://localhost:5173
-```
+## 📖 Usage Guide
 
-The API runs at:
+1. **Launch the Dashboard:** Open the UI in your web browser.
+2. **Define Target:** Enter the full URL of the target application (e.g., `https://example.com`).
+3. **Start Scan:** Click the play button. The scan will trigger multiple concurrent modules.
+4. **Monitor Live Progress:** Navigate through the module tabs to see data arriving in real time. The **Vulns** and **Files** tabs feature a live terminal output view.
+5. **Analyze Results:** Findings are automatically parsed, categorized, and presented. URLs and references are highly clickable for quick pivoting.
+6. **Export Data:** Click the download icon in the header to save a comprehensive JSON report of the entire scan, or use the tab-specific download button to export data for the active module only.
 
-```text
-http://localhost:4000
-```
+## ⚖️ Responsible Use
 
-## Usage
+**ReconZero** is designed solely for assets you own or have explicit, documented authorization to test. 
+Keep your scan concurrency and wordlists at reasonable limits to prevent unintended service degradation. The creators are not responsible for misuse or damage caused by this software.
 
-1. Enter a full target URL, such as `https://example.com`.
-2. Start the scan from the dashboard.
-3. Watch each module update as results arrive.
-4. Use the stop button if you need to cancel an active scan.
-5. Download the JSON report after completion.
+## 👨‍💻 Creator
 
-## Scripts
+Built by **Pavin Das** — Ethical Hacker & Web Application Tester.
 
-```bash
-npm run dev      # Start client and server together
-npm run build    # Build the client
-npm run lint     # Lint the client
-npm start        # Start the server
-```
-
-## Responsible Use
-
-ReconZero is intended for assets you own or have explicit permission to assess. Keep scan limits reasonable, especially when using larger wordlists or higher concurrency.
-
-## Creator
-
-Created by **Pavin Das**.
-
-- GitHub: [PavinDas](https://github.com/PavinDas)
-- Profile: [pavindas.github.io](https://pavindas.github.io)
+- **GitHub:** [PavinDas](https://github.com/PavinDas)
+- **Profile:** [pavindas.github.io](https://pavindas.github.io)
