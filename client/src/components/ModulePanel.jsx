@@ -564,6 +564,7 @@ function SimpleTable({ columns, empty, rows }) {
 function renderCell(cell) {
   if (cell === 0) return "0";
   if (cell === undefined || cell === null || cell === "") return "-";
+  if (typeof cell !== "string" && typeof cell !== "number") return cell;
   return formatTextAsLink(cell);
 }
 
@@ -630,13 +631,13 @@ function shortDate(value) {
 }
 
 function formatTextAsLink(text) {
-  const str = String(text);
-  if (/^https?:\/\/[^\s]+$/i.test(str)) {
+  if (typeof text !== "string") return text;
+  if (/^https?:\/\/[^\s]+$/i.test(text)) {
     return (
-      <a href={str} target="_blank" rel="noreferrer" className="text-mint hover:underline">
-        {str}
+      <a href={text} target="_blank" rel="noreferrer" className="text-mint hover:underline">
+        {text}
       </a>
     );
   }
-  return str;
+  return text;
 }
