@@ -338,7 +338,9 @@ function SimpleTable({ columns, empty, rows }) {
           {rows.map((row, index) => (
             <tr key={index}>
               {row.map((cell, cellIndex) => (
-                <td key={`${index}-${cellIndex}`}>{cell === 0 ? "0" : String(cell || "-")}</td>
+                <td key={`${index}-${cellIndex}`}>
+                  <div className="table-cell-scroll">{cell === 0 ? "0" : String(cell || "-")}</div>
+                </td>
               ))}
             </tr>
           ))}

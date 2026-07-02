@@ -46,9 +46,10 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-ink text-slate-100 font-mono selection:bg-acid selection:text-ink">
-      <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-5 border-b border-line/70 pb-6 md:flex-row md:items-end md:justify-between">
+    <main className="h-dvh w-dvw overflow-hidden bg-ink text-slate-100 font-mono selection:bg-acid selection:text-ink">
+      <section className="flex h-full w-full flex-col gap-5 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+        <header className="shrink-0 border-b border-line/70 pb-4">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-cyan-300">
               <Terminal size={14} />
@@ -64,12 +65,13 @@ export default function App() {
             <StatusPill label="status" value={status} icon={Activity} tone={status} />
             <StatusPill label="modules" value={`${completed}/${modules.length}`} icon={Radar} />
           </div>
+          </div>
         </header>
 
-        <div className="grid flex-1 gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-          <aside className="space-y-6">
+        <div className="grid min-h-0 flex-1 gap-5 overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)]">
+          <aside className="flex min-h-0 flex-col gap-5 overflow-hidden">
             <TargetForm disabled={status === "running"} onStart={handleStart} />
-            <div className="terminal-panel p-5">
+            <div className="terminal-panel shrink-0 p-5">
               <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.14em] text-slate-400">
                 <span>progress</span>
                 <span className="text-cyan-300">{progress}%</span>
@@ -100,8 +102,8 @@ export default function App() {
             <Timeline events={events} />
           </aside>
 
-          <section className="terminal-panel min-h-[680px] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line/70 px-6 py-4">
+          <section className="terminal-panel flex min-h-0 flex-col overflow-hidden">
+            <div className="flex shrink-0 items-center justify-between border-b border-line/70 px-6 py-4">
               <div className="truncate text-sm text-slate-400">
                 target: <span className="text-cyan-200">{scan?.target || "awaiting input"}</span>
               </div>
@@ -114,7 +116,7 @@ export default function App() {
             <AnimatePresence mode="wait">
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6"
+                className="result-scroll min-h-0 flex-1 overflow-auto p-6"
                 exit={{ opacity: 0, y: 8 }}
                 initial={{ opacity: 0, y: 8 }}
                 key={activeModule}
@@ -124,7 +126,7 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
             {scan?.target && (
-              <div className="border-t border-line/70 px-6 py-4 text-xs text-slate-500">
+              <div className="shrink-0 border-t border-line/70 px-6 py-4 text-xs text-slate-500">
                 <ExternalLink className="mr-2 inline" size={13} />
                 only scan assets you own or have explicit permission to assess
               </div>
