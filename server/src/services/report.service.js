@@ -15,7 +15,6 @@ export function writeReport(report) {
 }
 
 export function getReport(scanId) {
-  if (reports.has(scanId)) return reports.get(scanId);
   const filePath = path.join(root, `${scanId}.json`);
   if (!fs.existsSync(filePath)) return null;
   return { path: filePath, publicPath: `/api/reports/${scanId}/json` };

@@ -332,7 +332,7 @@ function VulnsResult({ result, running }) {
                 <p className="vuln-card-msg">{vuln.msg}</p>
                 {(vuln.url) && (
                   <div className="vuln-card-meta">
-                    <span>📍 {vuln.url || "/"}</span>
+                    <span>📍 {vuln.url.startsWith("http") ? <a href={vuln.url} target="_blank" rel="noreferrer" className="text-mint hover:underline">{vuln.url}</a> : vuln.url}</span>
                     {vuln.id && <span>ID: {vuln.id}</span>}
                   </div>
                 )}
@@ -526,7 +526,7 @@ function TagList({ empty, items }) {
     <div className="tag-list">
       {cleanItems.map((item) => (
         <span className="data-tag" key={String(item)}>
-          {String(item)}
+          {formatTextAsLink(item)}
         </span>
       ))}
     </div>
@@ -564,7 +564,7 @@ function SimpleTable({ columns, empty, rows }) {
 function renderCell(cell) {
   if (cell === 0) return "0";
   if (cell === undefined || cell === null || cell === "") return "-";
-  return cell;
+  return formatTextAsLink(cell);
 }
 
 function StatusTable({ rows }) {
@@ -589,7 +589,7 @@ function KeyValues({ data }) {
       {entries.map(([key, value]) => (
         <div key={key}>
           <span>{key}</span>
-          <strong>{Array.isArray(value) ? value.join(", ") : String(value)}</strong>
+          <strong>{Array.isArray(value) ? value.join(", ") : formatTextAsLink(value)}</strong>
         </div>
       ))}
     </div>
@@ -627,4 +627,16 @@ function readableHeader(value) {
 function shortDate(value) {
   if (!value) return "unknown";
   return String(value).slice(0, 10);
+}
+
+function formatTextAsLink(text) {
+  const str = String(text);
+  if (/^https?:\/\/[^\s]+$/i.test(str)) {
+    return (
+      <a href={str} target="_blank" rel="noreferrer" className="text-mint hover:underline">
+        {str}
+      </a>
+    );
+  }
+  return str;
 }

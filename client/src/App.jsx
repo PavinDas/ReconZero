@@ -1,5 +1,5 @@
 import { Activity, Download, ExternalLink, Radar, ShieldCheck, Terminal } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { startScan, stopScan } from "./services/api.js";
 import { useScanSocket } from "./hooks/useScanSocket.js";
@@ -17,6 +17,7 @@ export default function App() {
   const [results, setResults] = useState({});
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [reportPath, setReportPath] = useState(null);
 
   const handleScanEvent = useCallback((event) => {
     setEvents((current) => [event, ...current].slice(0, 80));
@@ -26,7 +27,10 @@ export default function App() {
     if (event.type === "module:done" || event.type === "module:error") {
       setResults((current) => ({ ...current, [event.module]: event.result }));
     }
-    if (event.type === "scan:complete") setStatus("complete");
+    if (event.type === "scan:complete") {
+      setStatus("complete");
+      if (event.report) setReportPath(event.report);
+    }
     if (event.type === "scan:stopped") setStatus("stopped");
     if (event.type === "scan:error") {
       setStatus("failed");
@@ -44,6 +48,7 @@ export default function App() {
     setError("");
     setEvents([]);
     setResults({});
+    setReportPath(null);
     setActiveModule("dns");
     const response = await startScan(target);
     setScan(response);
@@ -134,10 +139,27 @@ export default function App() {
               <div className="truncate text-sm text-teal">
                 target: <span className="text-mint">{scan?.target || "awaiting input"}</span>
               </div>
-              {scan?.id && (
-                <a className="icon-button" href={`/api/reports/${scan.id}/json`} title="Download JSON">
+              {/* Full-report download — only available after scan completes */}
+              {reportPath && (
+                <button
+                  className="icon-button"
+                  onClick={() => downloadReport(reportPath, scan?.id)}
+                  title="Download full JSON report"
+                  type="button"
+                >
                   <Download size={16} />
-                </a>
+                </button>
+              )}
+              {/* Per-tab module download — always available when a module has results */}
+              {results[activeModule] && (
+                <button
+                  className="icon-button"
+                  onClick={() => downloadModuleResult(results[activeModule], activeModule, scan?.id)}
+                  title={`Download ${activeModule} results as JSON`}
+                  type="button"
+                >
+                  <Download size={14} />
+                </button>
               )}
             </div>
             <AnimatePresence mode="wait">
@@ -227,4 +249,43 @@ function getModuleStatus(result) {
   if (result?.status === "running") return { className: "text-teal", label: "LIVE" };
   if (result) return { className: "text-mint", label: "OK" };
   return { className: "text-teal", label: "WAIT" };
+}
+
+function downloadReport(reportPath, scanId) {
+  if (!reportPath || !scanId) return;
+  fetch(reportPath)
+    .then((response) => {
+      if (!response.ok) throw new Error("Report not found");
+      return response.blob();
+    })
+    .then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `reconzero-${scanId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    })
+    .catch((error) => alert(error.message));
+}
+
+function downloadModuleResult(result, moduleName, scanId) {
+  if (!result || !scanId) return;
+  const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.style.display = "none";
+  a.href = url;
+  a.download = `reconzero-${scanId}-${moduleName}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 100);
 }
