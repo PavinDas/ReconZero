@@ -27,12 +27,12 @@ io.on("connection", (socket) => {
   socket.on("scan:join", (scanId) => socket.join(scanId));
 });
 
-app.get("/api/health", (_req, res) => res.json({ ok: true, service: "reconx" }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, service: "reconzero" }));
 app.use("/api/scans", scanRoutes);
 app.use("/api/reports", reportRoutes);
 app.use(errorHandler);
 
 const port = Number(process.env.PORT || 4000);
 server.listen(port, () => {
-  console.log(`ReconX API listening on http://localhost:${port}`);
+  console.log(`ReconZero API listening on http://localhost:${port}`);
 });

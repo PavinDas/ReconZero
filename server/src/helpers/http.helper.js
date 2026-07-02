@@ -4,7 +4,7 @@ export const httpClient = axios.create({
   headers: {
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "User-Agent": "ReconX/1.0 Local Passive Recon"
+    "User-Agent": "ReconZero/1.0"
   },
   maxBodyLength: 2_000_000,
   maxContentLength: 2_000_000,

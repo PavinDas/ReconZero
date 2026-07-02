@@ -1,6 +1,6 @@
-# ReconX
+# ReconZero
 
-ReconX is a local reconnaissance dashboard for authorized web targets. It brings common discovery signals into one clean workspace: DNS records, HTTP headers, TLS metadata, page structure, exposed file paths, technology hints, and a downloadable JSON report.
+ReconZero is a local reconnaissance dashboard for authorized web targets. It brings common discovery signals into one clean workspace: DNS records, HTTP headers, TLS metadata, page structure, exposed file paths, technology hints, and a downloadable JSON report.
 
 It is built for fast first-pass inspection: start a scan, watch module progress in real time, stop it when needed, and keep the results easy to read.
 
@@ -81,7 +81,7 @@ npm start        # Start the server
 
 ## Responsible Use
 
-ReconX is intended for assets you own or have explicit permission to assess. Keep scan limits reasonable, especially when using larger wordlists or higher concurrency.
+ReconZero is intended for assets you own or have explicit permission to assess. Keep scan limits reasonable, especially when using larger wordlists or higher concurrency.
 
 ## Creator
 

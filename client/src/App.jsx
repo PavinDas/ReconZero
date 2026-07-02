@@ -68,9 +68,9 @@ export default function App() {
           <div>
             <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-cyan-300">
               <Terminal size={14} />
-              local passive recon
+              by PavinDas [https://pavindas.github.io]
             </div>
-            <h1 className="text-4xl font-black leading-none text-slate-50 sm:text-6xl">ReconX</h1>
+            <h1 className="text-4xl font-black leading-none text-slate-50 sm:text-6xl">ReconZero</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
               Fast local reconnaissance with readable findings, live module progress, and exportable reports.
             </p>
