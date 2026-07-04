@@ -54,3 +54,6 @@ Thumbs.db
 # Package manager leftovers
 .npm/
 .pnpm-store/
+
+# Nikto files
+nikto_http_*
